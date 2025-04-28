@@ -1,0 +1,78 @@
+# Archivo: app.py
+
+import streamlit as st
+import pandas as pd
+from sklearn.linear_model import LogisticRegression
+import matplotlib.pyplot as plt
+
+# 🎨 Inyectar CSS para cambiar fondo de la página
+st.markdown(
+    """
+    <style>
+    .stApp {
+        background-color: #f0f8ff;
+        background-image: linear-gradient(120deg, #f0f8ff, #e6f7ff, #ccf2ff);
+        background-size: cover;
+    }
+    </style>
+    """,
+    unsafe_allow_html=True
+)
+
+# 🎯 Título e Imagen
+st.title("🎯 ¡Predicción de tu Aprobación Escolar! 🎯")
+st.image("https://cdn.pixabay.com/photo/2016/03/31/19/17/success-1297395_1280.png", width=400)
+st.subheader("Descubre si lograrás aprobar tus exámenes 🎓💥")
+
+# 🔢 Crear datos históricos
+datos = pd.DataFrame({
+    'Examen1': [34.62, 30.28, 35.84, 60.18, 79.03, 45.08, 61.18, 75.29, 45.45, 55.32],
+    'Examen2': [78.02, 43.89, 72.90, 86.30, 75.34, 56.31, 96.51, 90.45, 65.32, 67.89],
+    'Aprobado': [0, 0, 0, 1, 1, 0, 1, 1, 0, 1]
+})
+
+# 🧠 Entrenar modelo
+X = datos[['Examen1', 'Examen2']]
+y = datos['Aprobado']
+modelo = LogisticRegression()
+modelo.fit(X, y)
+
+# 📚 Inputs del usuario
+st.markdown("### Ingresa tus calificaciones:")
+examen1 = st.number_input("📘 Examen 1:", min_value=0.0, max_value=100.0, value=50.0)
+examen2 = st.number_input("📗 Examen 2:", min_value=0.0, max_value=100.0, value=50.0)
+
+# 🚀 Botón para predecir
+if st.button("🚀 Predecir mi resultado"):
+    nueva_nota = [[examen1, examen2]]
+    prediccion = modelo.predict(nueva_nota)
+    probabilidad = modelo.predict_proba(nueva_nota)[0][1]
+
+    st.markdown("## 📋 Resultados:")
+    st.write(f"**Tus calificaciones:** Examen 1 = {examen1}, Examen 2 = {examen2}")
+    st.write(f"**Probabilidad de aprobar:** {probabilidad:.2%}")
+
+    # Mensaje motivacional
+    if prediccion[0] == 1:
+        if probabilidad > 0.8:
+            st.success("✅ ¡Súper estrella! ¡Aprobaste con excelente probabilidad! 🌟🎉")
+        else:
+            st.success("✅ ¡Aprobaste! ¡Sigue esforzándote! 🚀")
+    else:
+        if probabilidad > 0.4:
+            st.warning("⚠️ ¡Casi lograste aprobar! ¡No te rindas! 🔥")
+        else:
+            st.error("❌ No aprobaste esta vez, ¡pero puedes mejorar! 💪")
+
+    # 📈 Graficar la probabilidad
+    fig, ax = plt.subplots()
+    ax.bar(['Probabilidad de Aprobar', 'Probabilidad de No Aprobar'], [probabilidad, 1 - probabilidad], color=['green', 'red'])
+    ax.set_ylim(0, 1)
+    ax.set_ylabel('Probabilidad')
+    ax.set_title('📊 Resultado Visual de tu Predicción')
+    st.pyplot(fig)
+
+# 🏁 Footer
+st.markdown("---")
+st.markdown("Aplicación desarrollada por **Leonardo** 🚀 | ¡Sigue soñando en grande! 🌟")
+
